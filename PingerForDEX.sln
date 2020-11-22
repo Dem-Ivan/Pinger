@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29905.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PingerForDEX", "PingerForDEX\PingerForDEX.csproj", "{1187AF20-6987-40C3-B452-E45D37DFD90B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingerForDEX.Tests", "PingerForDEX.Tests\PingerForDEX.Tests.csproj", "{B96720B0-AAB1-41CF-A9C1-D9F107A2D77C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1187AF20-6987-40C3-B452-E45D37DFD90B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1187AF20-6987-40C3-B452-E45D37DFD90B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1187AF20-6987-40C3-B452-E45D37DFD90B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1187AF20-6987-40C3-B452-E45D37DFD90B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B96720B0-AAB1-41CF-A9C1-D9F107A2D77C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B96720B0-AAB1-41CF-A9C1-D9F107A2D77C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B96720B0-AAB1-41CF-A9C1-D9F107A2D77C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B96720B0-AAB1-41CF-A9C1-D9F107A2D77C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A55C50CA-533C-420D-B55E-597A26593595}
+	EndGlobalSection
+EndGlobal
