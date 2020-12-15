@@ -8,11 +8,7 @@ using System.Threading.Tasks;
 namespace PingerForDEX.Domain
 {
 	public class HttpPinger : IPinger
-	{
-		public event Action<string> ChangeStatus;
-
-		private readonly ISettings _settings;
-
+	{	
 		private readonly HttpRequestMessage _httpRequestMessage;
 
 		private readonly HttpClient _httpClient;
@@ -22,52 +18,52 @@ namespace PingerForDEX.Domain
 		private int StatusCode { get; set; }
 		public string ResponseMesage { get; set; }
 
-		public HttpPinger(HttpClient httpClient, ISettings settings, HttpRequestMessage httpRequestMessage)
-		{
-			_settings = settings ?? throw new ArgumentNullException(nameof(settings));
+		public HttpPinger(HttpClient httpClient, HttpRequestMessage httpRequestMessage)
+		{			
 			_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 			_httpRequestMessage = httpRequestMessage ?? throw new ArgumentNullException(nameof(httpRequestMessage));
-			PreviousStatus = 0;//протесть!--------------------------------------_-
+			PreviousStatus = 0;
 		}
-		public async Task<string> CheckStatusAsynk()
+		public async Task<ResponseData> CheckStatusAsync(string hostName)
 		{
-			var uri = new Uri("http://" + _settings.Host);
+			var uri = new Uri("http://" + hostName);
 			_httpRequestMessage.Method = HttpMethod.Head;
 			_httpRequestMessage.RequestUri = uri;
+			ResponseData respounseData = new ResponseData();
 
 			try
 			{
 				var result = await _httpClient.SendAsync(_httpRequestMessage);
 				NewStatus = result.StatusCode;
 				StatusCode = (int)NewStatus;
-				ResponseMesage = CreateResponseMessage(NewStatus.ToString());
+				ResponseMesage = CreateResponseMessage(NewStatus.ToString(), hostName);
+				respounseData.StatusWasShanged = false;
 
 				if (NewStatus != PreviousStatus)
 				{
-					ChangeStatus?.Invoke(ResponseMesage);
+					respounseData.Message = ResponseMesage;
+					respounseData.StatusWasShanged = true;					
+					
 					PreviousStatus = NewStatus;
 				}
+				
 			}
 			#region catch
 			catch (HttpRequestException ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message);
-				ChangeStatus?.Invoke(ResponseMesage);
+				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
 			}
 			catch (InvalidOperationException ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message);
-				ChangeStatus?.Invoke(ResponseMesage);
+				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
 			}
 			catch (UriFormatException ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message);
-				ChangeStatus?.Invoke(ResponseMesage);
+				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
 			}
 			catch (Exception ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message);
-				ChangeStatus?.Invoke(ResponseMesage);
+				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
 			}
 			#endregion
 			finally
@@ -75,7 +71,7 @@ namespace PingerForDEX.Domain
 				ResetStatusFild();
 			}
 
-			return ResponseMesage;
+			return respounseData;
 		}
 
 		private void ResetStatusFild()
@@ -89,13 +85,13 @@ namespace PingerForDEX.Domain
 			}
 		}
 
-		public string CreateResponseMessage(string status)
+		public string CreateResponseMessage(string status, string hostName)
 		{
 			return
 				(
 				"HTTP " +
 				" // " + DateTime.Now +
-				" // " + _httpRequestMessage.RequestUri +
+				" // " + hostName +
 				" // " + StatusCode +
 				" // " + status
 				);

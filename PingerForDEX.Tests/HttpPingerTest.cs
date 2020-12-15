@@ -1,47 +1,54 @@
-﻿using PingerForDEX.Configuration;
-using PingerForDEX.Domain;
+﻿using PingerForDEX.Domain;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
+
 namespace PingerForDEX.Tests
 {
+	
 	public class HttpPingerTest
 	{
 		[Fact]
-		public async Task CheckStatusResult()
+		public void ConstructorTest()
 		{
 			//Arrange
-			var loadConfiguration = new ConfigurationForTest();
-			var configuration = loadConfiguration.LoadConfiguration();
-			var setting = new Settings(configuration);
 			var httpClient = new HttpClient();
 			var httpRequestMessage = new HttpRequestMessage();
-			var httpPinger = new HttpPinger(httpClient, setting, httpRequestMessage);
-
-			//Act
-			var result = await httpPinger.CheckStatusAsynk();
 
 			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());
-			Assert.Contains("// https://ya.ru/ //", result);
+			Assert.Throws<ArgumentNullException>(() => new HttpPinger(null, httpRequestMessage));
+			Assert.Throws<ArgumentNullException>(() => new HttpPinger(httpClient, null));
+		}
+
+		[Fact]
+		public async Task CheckStatusResult()
+		{
+			//Arrange			
+			var httpClient = new HttpClient();
+			var httpRequestMessage = new HttpRequestMessage();
+			var httpPinger = new HttpPinger(httpClient, httpRequestMessage);
+
+			//Act
+			var result = await httpPinger.CheckStatusAsync("www.ya.ru");
+
+			//Assert
+			Assert.NotNull(result.Message);
+			Assert.NotEmpty(result.Message);
+			Assert.Equal(typeof(string), result.Message.GetType());			
 		}
 
 		[Fact]
 		public void CreateResponseMessageResult()
 		{
-			//Arrange
-			var loadConfiguration = new ConfigurationForTest();
-			var configuration = loadConfiguration.LoadConfiguration();
-			var setting = new Settings(configuration);
+			//Arrange						
 			var httpClient = new HttpClient();
 			var httpRequestMessage = new HttpRequestMessage();
-			var httpPinger = new HttpPinger(httpClient, setting, httpRequestMessage);
+			var httpPinger = new HttpPinger(httpClient, httpRequestMessage);
 
 			//Act
-			var result = httpPinger.CreateResponseMessage("OK");
+			var result = httpPinger.CreateResponseMessage("OK", "www.ya.ru");
 
 			//Assert
 			Assert.NotNull(result);

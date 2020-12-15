@@ -1,54 +1,51 @@
 ﻿using Xunit;
 using PingerForDEX.Domain;
-using PingerForDEX.Configuration;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
+using System;
 
 namespace PingerForDEX.Tests
-{
+{	
+
 	public class IcmpPingerTest
 	{
 		[Fact]
+		public void ConstructorTest()
+		{
+			//Assert
+			Assert.Throws<ArgumentNullException>(() => new IcmpPinger(null));			
+		}
+
+		[Fact]
 		public async Task CheckStatusResult()
 		{
-			//Arrange
-			var loadConfiguration = new ConfigurationForTest();
-			var configuration = loadConfiguration.LoadConfiguration();
-			var setting = new Settings(configuration);
+			//Arrange					
 			var ping = new Ping();
-			var icmpPinger = new IcmpPinger(setting, ping);
+			var icmpPinger = new IcmpPinger(ping);
 
 			//Act
-			var result = await icmpPinger.CheckStatusAsynk();
-
+			var result = await icmpPinger.CheckStatusAsync("www.ya.ru");
 
 			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());
-			Assert.Contains("// www.ya.ru //", result);
-
-
+			Assert.NotNull(result.Message);
+			Assert.NotEmpty(result.Message);
+			Assert.Equal(typeof(string), result.Message.GetType());
 		}
 
 		[Fact]
 		public void CreateResponseMessageResult()
 		{
-			//Arrange
-			var loadConfiguration = new ConfigurationForTest();
-			var configuration = loadConfiguration.LoadConfiguration();
-			var setting = new Settings(configuration);
+			//Arrange			
 			var ping = new Ping();
-			var icmpPinger = new IcmpPinger(setting, ping);
+			var icmpPinger = new IcmpPinger(ping);
 
 			//Act
-			var result = icmpPinger.CreateResponseMessage("Success");
+			var result = icmpPinger.CreateResponseMessage("Success", "www.ya.ru");
 
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());
-			Assert.Contains("// www.ya.ru // Success", result);
+			Assert.Equal(typeof(string), result.GetType());			
 		}
 
 	}

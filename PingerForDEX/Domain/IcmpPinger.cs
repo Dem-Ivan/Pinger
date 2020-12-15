@@ -1,6 +1,5 @@
 ﻿using PingerForDEX.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
@@ -8,58 +7,55 @@ namespace PingerForDEX.Domain
 {
 	public class IcmpPinger : IPinger
 	{
-		public event Action<string> ChangeStatus;
-
-		private readonly ISettings _settings;
-
 		private readonly Ping _ping;
 		private IPStatus PreviousStatus { get; set; }
 		private IPStatus NewStatus { get; set; }
 		public string ResponseMesage { get; set; }
 
-		public IcmpPinger(ISettings settings, Ping ping)
+		public IcmpPinger(Ping ping)
 		{
-			_settings = settings ?? throw new ArgumentNullException(nameof(settings));
 			_ping = ping ?? throw new ArgumentNullException(nameof(ping));
 			PreviousStatus = IPStatus.Unknown;
 		}
-		public async Task<string> CheckStatusAsynk()
+		public async Task<ResponseData> CheckStatusAsync(string hostName)
 		{
-			var uri = _settings.Host;
+			var uri = hostName;
+			ResponseData respounseData = new ResponseData();
 
 			try
 			{
 				var result = await _ping.SendPingAsync(uri, 1000);
 				NewStatus = result.Status;
-				ResponseMesage = CreateResponseMessage(NewStatus.ToString());
+				ResponseMesage = CreateResponseMessage(NewStatus.ToString(), hostName);
+				respounseData.StatusWasShanged = false;
 
 				if (NewStatus != PreviousStatus)
 				{
-					ChangeStatus?.Invoke(ResponseMesage);
+					respounseData.Message = ResponseMesage;
+					respounseData.StatusWasShanged = true;
+
 					PreviousStatus = NewStatus;
 				}
 
 			}
 			catch (PingException ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message);
-				ChangeStatus?.Invoke(ResponseMesage);
+				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
 			}
 			catch (Exception ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message);
-				ChangeStatus?.Invoke(ResponseMesage);
+				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
 			}
-			return ResponseMesage;
+			return respounseData;
 		}
 
-		public string CreateResponseMessage(string status)
+		public string CreateResponseMessage(string status, string hostName)
 		{
 			return 
 				(
 				"ICMP " +
 				" // " + DateTime.Now +
-				" // " + _settings.Host +
+				" // " + hostName +
 				" // " + status
 				);
 		}

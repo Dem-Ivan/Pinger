@@ -1,51 +1,39 @@
 ﻿using Xunit;
 using PingerForDEX.Domain;
-using PingerForDEX.Configuration;
 using System.Threading.Tasks;
 
 namespace PingerForDEX.Tests
 {
 	public class TcpPingerTest
-	{
+	{		
 		[Fact]
 		public async Task CheckStatusResult()
 		{
-			//Arrange
-			var loadConfiguration = new ConfigurationForTest();
-			var configuration = loadConfiguration.LoadConfiguration();
-			var setting = new Settings(configuration);
-			var tcpPinger = new TcpPinger(setting);
+			//Arrange			
+			var tcpPinger = new TcpPinger();
 
 			//Act
-			var result = await tcpPinger.CheckStatusAsynk();
-
+			var result = await tcpPinger.CheckStatusAsync("www.ya.ru");
 
 			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());
-			Assert.Contains("// www.ya.ru // 80 //", result);
-			
-			
+			Assert.NotNull(result.Message);
+			Assert.NotEmpty(result.Message);
+			Assert.Equal(typeof(string), result.Message.GetType());						
 		}
 
 		[Fact]
 		public void CreateResponseMessageResult()
 		{
-			//Arrange
-			var loadConfiguration = new ConfigurationForTest();
-			var configuration = loadConfiguration.LoadConfiguration();
-			var setting = new Settings(configuration);
-			var tcpPinger = new TcpPinger(setting);
+			//Arrange				
+			var tcpPinger = new TcpPinger();
 
 			//Act
-			var result = tcpPinger.CreateResponseMessage("Success");
+			var result = tcpPinger.CreateResponseMessage("Success", "www.ya.ru");
 
 			//Assert
 			Assert.NotNull(result);
 			Assert.NotEmpty(result);
 			Assert.Equal(typeof(string), result.GetType());
-			Assert.Contains("// www.ya.ru // 80 // Success", result);
 		}
 	}
 }
