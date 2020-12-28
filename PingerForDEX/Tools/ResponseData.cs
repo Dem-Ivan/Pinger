@@ -1,5 +1,5 @@
 ﻿
-namespace PingerForDEX.Domain
+namespace PingerForDEX.Tools
 {
 	public class ResponseData
 	{

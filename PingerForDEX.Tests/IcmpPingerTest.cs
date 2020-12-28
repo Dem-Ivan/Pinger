@@ -32,21 +32,21 @@ namespace PingerForDEX.Tests
 			Assert.Equal(typeof(string), result.Message.GetType());
 		}
 
-		[Fact]
-		public void CreateResponseMessageResult()
-		{
-			//Arrange			
-			var ping = new Ping();
-			var icmpPinger = new IcmpPinger(ping);
+		//[Fact]
+		//public void CreateResponseMessageResult()
+		//{
+		//	//Arrange			
+		//	var ping = new Ping();
+		//	var icmpPinger = new IcmpPinger(ping);
 
-			//Act
-			var result = icmpPinger.CreateResponseMessage("Success", "www.ya.ru");
+		//	//Act
+		//	var result = icmpPinger.CreateResponseMessage("Success", "www.ya.ru");
 
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());			
-		}
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.NotEmpty(result);
+		//	Assert.Equal(typeof(string), result.GetType());			
+		//}
 
 	}
 }

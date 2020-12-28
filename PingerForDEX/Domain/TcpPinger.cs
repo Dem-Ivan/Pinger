@@ -1,4 +1,5 @@
 ﻿using PingerForDEX.Interfaces;
+using PingerForDEX.Tools;
 using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -7,17 +8,16 @@ namespace PingerForDEX.Domain
 {
 	public class TcpPinger : IPinger
 	{
-		
-		private string PreviousStatus { get; set; }
-		private string NewStatus { get; set; }		
-		public string ResponseMesage { get; set ; }
+
+		private string _previousStatus;
+		private string _newStatus;
+		private string _responseMesage;
 		
 
 		public async Task<ResponseData> CheckStatusAsync(string hostName)
 		{
 			using var tcpClient = new TcpClient();
 			ResponseData respounseData = new ResponseData();
-
 			try
 			{
 				var task = Task.Run(() => tcpClient.ConnectAsync(hostName, 80).Wait(1000));
@@ -25,60 +25,37 @@ namespace PingerForDEX.Domain
 
 				if (result)
 				{
-					NewStatus = "Success";
-					ResponseMesage = CreateResponseMessage(NewStatus, hostName);									
+					_newStatus = "Success";
+					_responseMesage = CreateResponseMessage(_newStatus, hostName);									
 				}
 				else
 				{
-					NewStatus = "Fail";
-					ResponseMesage = CreateResponseMessage(NewStatus, hostName);					
+					_newStatus = "Fail";
+					_responseMesage = CreateResponseMessage(_newStatus, hostName);					
 				}
 
 				respounseData.StatusWasShanged = false;
 
-				if (NewStatus != PreviousStatus)
+				if (_newStatus != _previousStatus)
 				{
-					respounseData.Message = ResponseMesage;
+					respounseData.Message = _responseMesage;
 					respounseData.StatusWasShanged = true;
 
-					PreviousStatus = NewStatus;
+					_previousStatus = _newStatus;
 				}
-			}
-			#region catch
-			catch (SocketException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			catch (ObjectDisposedException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			catch (NullReferenceException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			catch (ArgumentNullException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			catch (AggregateException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
+			}			
 			catch (Exception ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);			
-			}
-			#endregion
+				_responseMesage = CreateResponseMessage(ex.InnerException.Message, hostName);			
+			}			
 			finally
 			{
 				tcpClient.Close();
 			}
-
 			return respounseData;
 		}
 
-		public string CreateResponseMessage(string status, string hostName)
+		private string CreateResponseMessage(string status, string hostName)
 		{
 			return
 				(

@@ -1,4 +1,5 @@
 ﻿using PingerForDEX.Interfaces;
+using PingerForDEX.Tools;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -8,21 +9,21 @@ using System.Threading.Tasks;
 namespace PingerForDEX.Domain
 {
 	public class HttpPinger : IPinger
-	{	
+	{
 		private readonly HttpRequestMessage _httpRequestMessage;
 
 		private readonly HttpClient _httpClient;
 
-		private HttpStatusCode PreviousStatus { get; set; }
-		private HttpStatusCode NewStatus { get; set; }
-		private int StatusCode { get; set; }
-		public string ResponseMesage { get; set; }
+		private HttpStatusCode _previousStatus;
+		private HttpStatusCode _newStatus;
+		private int _statusCode;
+		public string _responseMesage;
 
 		public HttpPinger(HttpClient httpClient, HttpRequestMessage httpRequestMessage)
-		{			
+		{
 			_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 			_httpRequestMessage = httpRequestMessage ?? throw new ArgumentNullException(nameof(httpRequestMessage));
-			PreviousStatus = 0;
+			_previousStatus = 0;
 		}
 		public async Task<ResponseData> CheckStatusAsync(string hostName)
 		{
@@ -34,38 +35,23 @@ namespace PingerForDEX.Domain
 			try
 			{
 				var result = await _httpClient.SendAsync(_httpRequestMessage);
-				NewStatus = result.StatusCode;
-				StatusCode = (int)NewStatus;
-				ResponseMesage = CreateResponseMessage(NewStatus.ToString(), hostName);
+				_newStatus = result.StatusCode;
+				_statusCode = (int)_newStatus;
+				_responseMesage = CreateResponseMessage(_newStatus.ToString(), hostName);
 				respounseData.StatusWasShanged = false;
 
-				if (NewStatus != PreviousStatus)
+				if (_newStatus != _previousStatus)
 				{
-					respounseData.Message = ResponseMesage;
-					respounseData.StatusWasShanged = true;					
-					
-					PreviousStatus = NewStatus;
+					respounseData.Message = _responseMesage;
+					respounseData.StatusWasShanged = true;
+
+					_previousStatus = _newStatus;
 				}
-				
-			}
-			#region catch
-			catch (HttpRequestException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			catch (InvalidOperationException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			catch (UriFormatException ex)
-			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
+			}			
 			catch (Exception ex)
 			{
-				ResponseMesage = CreateResponseMessage(ex.Message, hostName);				
-			}
-			#endregion
+				_responseMesage = CreateResponseMessage(ex.InnerException.Message, hostName);
+			}		
 			finally
 			{
 				ResetStatusFild();
@@ -85,14 +71,14 @@ namespace PingerForDEX.Domain
 			}
 		}
 
-		public string CreateResponseMessage(string status, string hostName)
+		private string CreateResponseMessage(string status, string hostName)
 		{
 			return
 				(
 				"HTTP " +
 				" // " + DateTime.Now +
 				" // " + hostName +
-				" // " + StatusCode +
+				" // " + _statusCode +
 				" // " + status
 				);
 		}

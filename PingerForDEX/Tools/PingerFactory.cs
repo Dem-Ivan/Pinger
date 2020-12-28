@@ -1,42 +1,29 @@
 ﻿using PingerForDEX.Configuration;
 using PingerForDEX.Interfaces;
 using System;
+using PingerForDEX.Domain;
 
-namespace PingerForDEX.Domain
+
+namespace PingerForDEX.Tools
 {
 	public class PingerFactory
 	{
-		private readonly IcmpPinger _icmpPinger;
-		private readonly TcpPinger _tcpPinger;
-		private readonly HttpPinger _httpPinger;
+		private readonly IServiceProvider _serviceProvider;
 
-		public PingerFactory(IcmpPinger icmpPinger, TcpPinger tcpPinger, HttpPinger httpPinger)
+		public PingerFactory(IServiceProvider serviceProvider)
 		{
-			_icmpPinger = icmpPinger ?? throw new ArgumentNullException(nameof(icmpPinger)); 
-			_tcpPinger = tcpPinger ?? throw new ArgumentNullException(nameof(tcpPinger)); 
-			_httpPinger = httpPinger ?? throw new ArgumentNullException(nameof(httpPinger)); 
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
-		public IPinger CreatePinger(Settings settings)
+		public IPinger CreatePinger(string protocolType)
 		{
-			if (settings == null) throw new ArgumentNullException(nameof(settings));
-			
-			IPinger pinger = null;				
-			
-			if (settings.ProtocolType == "ICMP")
-			{				
-				pinger = _icmpPinger;
-			}
-			else if (settings.ProtocolType == "TCP")
-			{				
-				pinger = _tcpPinger;
-			}
-			else if (settings.ProtocolType == "HTTP")
-			{				
-				pinger = _httpPinger;
-			}
-
-			return pinger;
+			return protocolType switch
+			{
+				"ICMP" => _serviceProvider.GetService(typeof(IcmpPinger)) as IcmpPinger,
+				"TCP" => _serviceProvider.GetService(typeof(TcpPinger)) as TcpPinger,
+				"HTTP" => _serviceProvider.GetService(typeof(HttpPinger)) as HttpPinger,
+				_ => throw new ArgumentException("ProtocolType Error"),
+			};
 		}
 	}
 }

@@ -39,22 +39,22 @@ namespace PingerForDEX.Tests
 			Assert.Equal(typeof(string), result.Message.GetType());			
 		}
 
-		[Fact]
-		public void CreateResponseMessageResult()
-		{
-			//Arrange						
-			var httpClient = new HttpClient();
-			var httpRequestMessage = new HttpRequestMessage();
-			var httpPinger = new HttpPinger(httpClient, httpRequestMessage);
+		//[Fact]
+		//public void CreateResponseMessageResult()
+		//{
+		//	//Arrange						
+		//	var httpClient = new HttpClient();
+		//	var httpRequestMessage = new HttpRequestMessage();
+		//	var httpPinger = new HttpPinger(httpClient, httpRequestMessage);
 
-			//Act
-			var result = httpPinger.CreateResponseMessage("OK", "www.ya.ru");
+		//	//Act
+		//	var result = httpPinger.CreateResponseMessage("OK", "www.ya.ru");
 
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());			
-		}
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.NotEmpty(result);
+		//	Assert.Equal(typeof(string), result.GetType());			
+		//}
 
 	}
 }

@@ -1,5 +1,7 @@
-﻿using PingerForDEX.Configuration;
+﻿using Microsoft.Extensions.DependencyInjection;
+using PingerForDEX.Configuration;
 using PingerForDEX.Domain;
+using PingerForDEX.Tools;
 using System;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -12,38 +14,23 @@ namespace PingerForDEX.Tests
 		[Fact]
 		public void ConstructorTest()
 		{
-			//Arrange
-			var settings = new Settings() { ProtocolType = "TCP" };
-			var ping = new Ping();
-			var httpClient = new HttpClient();
-			var httpRequestMessage = new HttpRequestMessage();
-
-			var icmpPinger = new IcmpPinger(ping);
-			var tcpPinger = new TcpPinger();
-			var httpPinger = new HttpPinger(httpClient, httpRequestMessage);
-
 			//Assert
-			Assert.Throws<ArgumentNullException>(() => new PingerFactory(null, tcpPinger, httpPinger));
-			Assert.Throws<ArgumentNullException>(() => new PingerFactory(icmpPinger, null, httpPinger));
-			Assert.Throws<ArgumentNullException>(() => new PingerFactory(icmpPinger, tcpPinger, null));
+			Assert.Throws<ArgumentNullException>(() => new PingerFactory(null));			
 		}
 
 		[Fact]
 		public void CreatePingerResult()
 		{
 			//Arrange
+			var serviceEmulator = new ServicesEmulator();
+			var services = serviceEmulator.ConfigureServices();
+			var serviceProvider = services.BuildServiceProvider();
+
 			var settings1 = new Settings() { ProtocolType = "TCP" };
 			var settings2 = new Settings() { ProtocolType = "ICMP" };
-			var settings3 = new Settings() { ProtocolType = "HTTP" };
-			var ping = new Ping();
-			var httpClient = new HttpClient();
-			var httpRequestMessage = new HttpRequestMessage();			
+			var settings3 = new Settings() { ProtocolType = "HTTP" };		
 
-			var icmpPinger = new IcmpPinger(ping);
-			var tcpPinger = new TcpPinger();		
-			var httpPinger = new HttpPinger(httpClient, httpRequestMessage);
-
-			var pingerFctory = new PingerFactory(icmpPinger, tcpPinger, httpPinger);
+			var pingerFctory = new PingerFactory(serviceProvider);
 
 			//Act
 			var result1 = pingerFctory.CreatePinger(settings1);

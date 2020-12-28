@@ -21,19 +21,19 @@ namespace PingerForDEX.Tests
 			Assert.Equal(typeof(string), result.Message.GetType());						
 		}
 
-		[Fact]
-		public void CreateResponseMessageResult()
-		{
-			//Arrange				
-			var tcpPinger = new TcpPinger();
+		//[Fact]
+		//public void CreateResponseMessageResult()
+		//{
+		//	//Arrange				
+		//	var tcpPinger = new TcpPinger();
 
-			//Act
-			var result = tcpPinger.CreateResponseMessage("Success", "www.ya.ru");
+		//	//Act
+		//	var result = tcpPinger.CreateResponseMessage("Success", "www.ya.ru");
 
-			//Assert
-			Assert.NotNull(result);
-			Assert.NotEmpty(result);
-			Assert.Equal(typeof(string), result.GetType());
-		}
+		//	//Assert
+		//	Assert.NotNull(result);
+		//	Assert.NotEmpty(result);
+		//	Assert.Equal(typeof(string), result.GetType());
+		//}
 	}
 }
