@@ -11,7 +11,7 @@ namespace PingerForDEX.Domain
 
 		private string _previousStatus;
 		private string _newStatus;
-		private string _responseMesage;
+		private string _responseMessage;
 		
 
 		public async Task<ResponseData> CheckStatusAsync(string hostName)
@@ -26,27 +26,27 @@ namespace PingerForDEX.Domain
 				if (result)
 				{
 					_newStatus = "Success";
-					_responseMesage = CreateResponseMessage(_newStatus, hostName);									
+					_responseMessage = CreateResponseMessage(_newStatus, hostName);									
 				}
 				else
 				{
 					_newStatus = "Fail";
-					_responseMesage = CreateResponseMessage(_newStatus, hostName);					
+					_responseMessage = CreateResponseMessage(_newStatus, hostName);					
 				}
 
-				respounseData.StatusWasShanged = false;
+				respounseData.StatusWasChanged = false;
 
 				if (_newStatus != _previousStatus)
 				{
-					respounseData.Message = _responseMesage;
-					respounseData.StatusWasShanged = true;
+					respounseData.Message = _responseMessage;
+					respounseData.StatusWasChanged = true;
 
 					_previousStatus = _newStatus;
 				}
 			}			
 			catch (Exception ex)
 			{
-				_responseMesage = CreateResponseMessage(ex.InnerException.Message, hostName);			
+				_responseMessage = CreateResponseMessage(ex.InnerException?.Message, hostName);			
 			}			
 			finally
 			{

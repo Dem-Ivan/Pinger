@@ -19,21 +19,6 @@ namespace PingerForDEX.Tests
 			Assert.NotNull(result.Message);
 			Assert.NotEmpty(result.Message);
 			Assert.Equal(typeof(string), result.Message.GetType());						
-		}
-
-		//[Fact]
-		//public void CreateResponseMessageResult()
-		//{
-		//	//Arrange				
-		//	var tcpPinger = new TcpPinger();
-
-		//	//Act
-		//	var result = tcpPinger.CreateResponseMessage("Success", "www.ya.ru");
-
-		//	//Assert
-		//	Assert.NotNull(result);
-		//	Assert.NotEmpty(result);
-		//	Assert.Equal(typeof(string), result.GetType());
-		//}
+		}	
 	}
 }

@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using PingerForDEX.Configuration;
 using PingerForDEX.Domain;
 using PingerForDEX.Tools;
 using System;
-using System.Net.Http;
-using System.Net.NetworkInformation;
 using Xunit;
 
 namespace PingerForDEX.Tests
@@ -26,22 +23,18 @@ namespace PingerForDEX.Tests
 			var services = serviceEmulator.ConfigureServices();
 			var serviceProvider = services.BuildServiceProvider();
 
-			var settings1 = new Settings() { ProtocolType = "TCP" };
-			var settings2 = new Settings() { ProtocolType = "ICMP" };
-			var settings3 = new Settings() { ProtocolType = "HTTP" };		
-
-			var pingerFctory = new PingerFactory(serviceProvider);
+			var pingerFactory = serviceProvider.GetService<PingerFactory>();
 
 			//Act
-			var result1 = pingerFctory.CreatePinger(settings1);
-			var result2 = pingerFctory.CreatePinger(settings2);
-			var result3 = pingerFctory.CreatePinger(settings3);
+			var tcpResult = pingerFactory.CreatePinger("TCP");
+			var icmpResult = pingerFactory.CreatePinger("ICMP");
+			var httpResult = pingerFactory.CreatePinger("HTTP");
 
 			//Assert	
-			Assert.Throws<ArgumentNullException>(()=>pingerFctory.CreatePinger(null));
-			Assert.Equal(typeof(TcpPinger), result1.GetType());						
-			Assert.Equal(typeof(IcmpPinger), result2.GetType());						
-			Assert.Equal(typeof(HttpPinger), result3.GetType());
+			Assert.Throws<ArgumentException> (()=>pingerFactory.CreatePinger(null));
+			Assert.Equal(typeof(TcpPinger), tcpResult.GetType());						
+			Assert.Equal(typeof(IcmpPinger), icmpResult.GetType());						
+			Assert.Equal(typeof(HttpPinger), httpResult.GetType());
 		}
 	}
 }

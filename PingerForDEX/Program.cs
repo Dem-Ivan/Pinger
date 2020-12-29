@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace PingerForDEX
 {
-	class Program
+	internal class Program
 	{
 		public static async Task Main(string[] args)
 		{
@@ -20,12 +20,18 @@ namespace PingerForDEX
 			var serviceProvider = services.BuildServiceProvider();				
 			var cts = new CancellationTokenSource();
 			var token = cts.Token;
-			var pingerStarter = serviceProvider.GetService<PingerStarter>();
-			
-			await pingerStarter.StartAsync(token);
+			var  pingerStarter = serviceProvider.GetService<PingerStarter>();
 
+			if (pingerStarter != null) await pingerStarter.StartAsync(token);
+			else 
+			{
+				Console.WriteLine("PingerStarter Error");
+				return;
+			} 
+			
 			Console.WriteLine("Click <enter> to finish");
 			Console.ReadLine();
+
 			cts.Cancel();		
 			Console.ReadLine();
 		}
@@ -34,7 +40,7 @@ namespace PingerForDEX
 		{
 			var serviceCollection = new ServiceCollection();			
 			serviceCollection.AddTransient<HttpPinger>();
-			serviceCollection.AddSingleton<Settings>();		
+			serviceCollection.AddSingleton<SettingNode>();		
 			serviceCollection.AddTransient<IcmpPinger>();
 			serviceCollection.AddTransient<TcpPinger>();
 			serviceCollection.AddTransient<HttpRequestMessage>();
@@ -45,6 +51,7 @@ namespace PingerForDEX
 			serviceCollection.AddTransient<PingerFactory>();
 			serviceCollection.AddTransient<SettingsValidator>();
 			serviceCollection.AddTransient<PingerStarter>();
+			serviceCollection.AddSingleton<Settings>();
 			return serviceCollection;
 		}		
 	}

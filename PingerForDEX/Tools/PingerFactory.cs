@@ -1,5 +1,4 @@
-﻿using PingerForDEX.Configuration;
-using PingerForDEX.Interfaces;
+﻿using PingerForDEX.Interfaces;
 using System;
 using PingerForDEX.Domain;
 

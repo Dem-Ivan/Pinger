@@ -1,8 +1,8 @@
-﻿using PingerForDEX.Configuration;
+﻿using Microsoft.Extensions.DependencyInjection;
 using PingerForDEX.Tools;
-using PingerForDEX.Domain;
 using System;
 using Xunit;
+using System.Threading;
 
 namespace PingerForDEX.Tests
 {
@@ -10,16 +10,28 @@ namespace PingerForDEX.Tests
 	{
 		[Fact]
 		public void ConstructorTest()
+		{			
+			//Assert
+			Assert.Throws<ArgumentNullException>(() => new PingerStarter(null));			
+		}
+		
+		[Fact]
+		public void StartAsyncTest()
 		{
 			//Arrange
-			var settings = new Settings() { ProtocolType = "TCP" };
-			var pinger = new TcpPinger();
-			var logger = new Logger(this);
+			var serviceEmulator = new ServicesEmulator();
+			var services = serviceEmulator.ConfigureServices();
+			var serviceProvider = services.BuildServiceProvider();
+			var pingerStarter = serviceProvider.GetService<PingerStarter>();
+			var cts = new CancellationTokenSource();
+			var token = cts.Token;
+
+			//Act
+			var result = pingerStarter.StartAsync(token);
 
 			//Assert
-			Assert.Throws<ArgumentNullException>(() => new PingerStarter(null,  settings, logger));
-			Assert.Throws<ArgumentNullException>(() => new PingerStarter(pinger, null, logger));
-			Assert.Throws<ArgumentNullException>(() => new PingerStarter(pinger, settings, null));
+			Assert.NotNull(result);			
+			Assert.True(result.IsCompletedSuccessfully); 
 		}
 	}
 }

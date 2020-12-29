@@ -17,7 +17,7 @@ namespace PingerForDEX.Domain
 		private HttpStatusCode _previousStatus;
 		private HttpStatusCode _newStatus;
 		private int _statusCode;
-		public string _responseMesage;
+		public string _responseMessage;
 
 		public HttpPinger(HttpClient httpClient, HttpRequestMessage httpRequestMessage)
 		{
@@ -30,37 +30,37 @@ namespace PingerForDEX.Domain
 			var uri = new Uri("http://" + hostName);
 			_httpRequestMessage.Method = HttpMethod.Head;
 			_httpRequestMessage.RequestUri = uri;
-			ResponseData respounseData = new ResponseData();
+			ResponseData responseData = new ResponseData();
 
 			try
 			{
 				var result = await _httpClient.SendAsync(_httpRequestMessage);
 				_newStatus = result.StatusCode;
 				_statusCode = (int)_newStatus;
-				_responseMesage = CreateResponseMessage(_newStatus.ToString(), hostName);
-				respounseData.StatusWasShanged = false;
+				_responseMessage = CreateResponseMessage(_newStatus.ToString(), hostName);
+				responseData.StatusWasChanged = false;
 
 				if (_newStatus != _previousStatus)
 				{
-					respounseData.Message = _responseMesage;
-					respounseData.StatusWasShanged = true;
+					responseData.Message = _responseMessage;
+					responseData.StatusWasChanged = true;
 
 					_previousStatus = _newStatus;
 				}
 			}			
 			catch (Exception ex)
 			{
-				_responseMesage = CreateResponseMessage(ex.InnerException.Message, hostName);
+				_responseMessage = CreateResponseMessage(ex.InnerException?.Message, hostName);
 			}		
 			finally
 			{
-				ResetStatusFild();
+				ResetStatusField();
 			}
 
-			return respounseData;
+			return responseData;
 		}
 
-		private void ResetStatusFild()
+		private void ResetStatusField()
 		{
 			var requestType = _httpRequestMessage.GetType().GetTypeInfo();
 			var sendStatusFild = requestType.GetField("_sendStatus", BindingFlags.Instance | BindingFlags.NonPublic);

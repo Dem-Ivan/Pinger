@@ -20,7 +20,12 @@ namespace PingerForDEX.Tests
 			serviceCollection.AddTransient<HttpRequestMessage>();
 			serviceCollection.AddScoped<HttpClient>();
 			serviceCollection.AddScoped<TcpClient>();
-			serviceCollection.AddTransient<Ping>();			
+			serviceCollection.AddTransient<Ping>();
+			serviceCollection.AddTransient<SettingsValidator>();
+			serviceCollection.AddTransient<PingerFactory>();
+			serviceCollection.AddTransient<PingerStarter>();
+			serviceCollection.AddTransient<ILogger, Logger>();
+			serviceCollection.AddSingleton<Settings>();
 			return serviceCollection;
 		}
 	}

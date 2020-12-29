@@ -11,7 +11,7 @@ namespace PingerForDEX.Domain
 		private readonly Ping _ping;
 		private IPStatus _previousStatus;
 		private IPStatus _newStatus;
-		public string _responseMesage;
+		public string _responseMessage;
 
 		public IcmpPinger(Ping ping)
 		{
@@ -27,20 +27,20 @@ namespace PingerForDEX.Domain
 			{
 				var result = await _ping.SendPingAsync(uri, 1000);
 				_newStatus = result.Status;
-				_responseMesage = CreateResponseMessage(_newStatus.ToString(), hostName);
-				respounseData.StatusWasShanged = false;
+				_responseMessage = CreateResponseMessage(_newStatus.ToString(), hostName);
+				respounseData.StatusWasChanged = false;
 
 				if (_newStatus != _previousStatus)
 				{
-					respounseData.Message = _responseMesage;
-					respounseData.StatusWasShanged = true;
+					respounseData.Message = _responseMessage;
+					respounseData.StatusWasChanged = true;
 
 					_previousStatus = _newStatus;
 				}
 			}			
 			catch (Exception ex)
 			{
-				_responseMesage = CreateResponseMessage(ex.InnerException.Message, hostName);				
+				_responseMessage = CreateResponseMessage(ex.InnerException?.Message, hostName);				
 			}
 			return respounseData;
 		}

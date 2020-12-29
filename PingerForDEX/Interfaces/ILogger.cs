@@ -1,5 +1,4 @@
 ﻿
-
 namespace PingerForDEX.Interfaces
 {
 	public interface ILogger

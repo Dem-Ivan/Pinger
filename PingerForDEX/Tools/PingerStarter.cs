@@ -1,65 +1,61 @@
 ﻿using PingerForDEX.Configuration;
 using PingerForDEX.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation.Results;
-using Microsoft.Extensions.Configuration;
-using System.IO;
 
 namespace PingerForDEX.Tools
 {
 	public class PingerStarter
-	{
+	{		
+		private readonly IServiceProvider _serviceProvider;
 		private readonly ILogger _logger;
 		private readonly PingerFactory _pingerFactory;
 		private readonly SettingsValidator _settingsValidator;
+		private readonly Settings _settings;
 
-		public PingerStarter(ILogger logger, PingerFactory pingerFactory, SettingsValidator settingsValidator)
+		public PingerStarter(IServiceProvider serviceProvider)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_pingerFactory = pingerFactory ?? throw new ArgumentNullException(nameof(pingerFactory));
-			_settingsValidator = settingsValidator ?? throw new ArgumentNullException(nameof(settingsValidator));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_logger = _serviceProvider.GetService(typeof(ILogger)) as ILogger ?? throw new ArgumentNullException(nameof(_logger));
+			_pingerFactory = _serviceProvider.GetService(typeof(PingerFactory)) as PingerFactory ?? throw new ArgumentNullException(nameof(_pingerFactory));
+			_settingsValidator = serviceProvider.GetService(typeof(SettingsValidator)) as SettingsValidator ?? throw new ArgumentNullException(nameof(_settingsValidator));
+			_settings = serviceProvider.GetService(typeof(Settings)) as Settings ?? throw new ArgumentNullException(nameof(_settings));
 		}
 
 		public async Task StartAsync(CancellationToken token)
 		{
-			List<Settings> settingsList = new List<Settings>();
-			LoadConfiguration().GetSection("HostsList").Bind(settingsList, b => b.BindNonPublicProperties = true);// вынести в клас сеттинг
-			if (settingsList.Count == 0)
-			{
-				throw new ArgumentException("Settings Error");
-			}
+			var settingsList = _settings.GetSettingsList();	
+			
 			try
 			{
-				foreach (var settings in settingsList)
+				foreach (var settingNode in settingsList)
 				{
-					var validationResult = await _settingsValidator.ValidateAsync(settings);
+					var validationResult = await _settingsValidator.ValidateAsync(settingNode);
 
 					if (validationResult.IsValid)
 					{
 						var task = new Task(async () =>
 						{
-							await Run(settings, token);
+							await Run(settingNode, token);
 						}, token);
 						task.Start();
 					}
 					else
 					{
-						HendleErrors(validationResult, _logger);
+						HandleErrors(validationResult);
 					}
 				}
 			}
-			catch (OperationCanceledException ex)
+			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
-			}
-			
+				Console.WriteLine(ex.InnerException?.Message);
+			}			
 		}
 
 
-		private async Task Run(Settings settings, CancellationToken token)
+		private async Task Run(SettingNode settings, CancellationToken token)
 		{
 			ResponseData responseData;
 			var pinger = _pingerFactory.CreatePinger(settings.ProtocolType);
@@ -68,32 +64,22 @@ namespace PingerForDEX.Tools
 			{
 				responseData = await pinger.CheckStatusAsync(settings.HostName);
 
-				if (responseData.StatusWasShanged)
+				if (responseData.StatusWasChanged)
 				{
 					_logger.LogTheData(responseData.Message);
 				}
 				Thread.Sleep(settings.Period * 1000);
 			}
-			Console.WriteLine(settings.HostName + " - " + " pinger is stopped");
-			throw new OperationCanceledException(token);
+			Console.WriteLine(settings.HostName + " - " + " pinger is stopped");			
 		}
 
-		private void HendleErrors(ValidationResult result, ILogger logger)
+		private void HandleErrors(ValidationResult result)
 		{
 			foreach (var item in result.Errors)
 			{
-				logger.LogTheData(item.ErrorMessage);
+				_logger.LogTheData(item.ErrorMessage);
 				Console.WriteLine("Error! Check setting file.");
 			}
-		}
-
-		private IConfiguration LoadConfiguration()
-		{
-			var configuration = new ConfigurationBuilder()
-				.SetBasePath(Directory.GetCurrentDirectory())
-				.AddJsonFile("appsettings.json", false, true);
-
-			return configuration.Build();
-		}
+		}		
 	}
 }
