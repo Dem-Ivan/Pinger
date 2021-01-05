@@ -20,7 +20,7 @@ namespace PingerForDEX
 			var serviceProvider = services.BuildServiceProvider();				
 			var cts = new CancellationTokenSource();
 			var token = cts.Token;
-			var  pingerStarter = serviceProvider.GetService<PingerStarter>();
+			var pingerStarter = serviceProvider.GetService<PingerStarter>();
 
 			if (pingerStarter != null) await pingerStarter.StartAsync(token);
 			else 

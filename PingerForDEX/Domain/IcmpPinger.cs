@@ -11,7 +11,7 @@ namespace PingerForDEX.Domain
 		private readonly Ping _ping;
 		private IPStatus _previousStatus;
 		private IPStatus _newStatus;
-		public string _responseMessage;
+		private string _responseMessage;
 
 		public IcmpPinger(Ping ping)
 		{
@@ -21,8 +21,8 @@ namespace PingerForDEX.Domain
 		public async Task<ResponseData> CheckStatusAsync(string hostName)
 		{
 			var uri = hostName;
-			ResponseData respounseData = new ResponseData();
-			
+			var respounseData = new ResponseData();
+			  
 			try
 			{
 				var result = await _ping.SendPingAsync(uri, 1000);

@@ -8,7 +8,7 @@ using FluentValidation.Results;
 namespace PingerForDEX.Tools
 {
 	public class PingerStarter
-	{		
+	{
 		private readonly IServiceProvider _serviceProvider;
 		private readonly ILogger _logger;
 		private readonly PingerFactory _pingerFactory;
@@ -26,8 +26,8 @@ namespace PingerForDEX.Tools
 
 		public async Task StartAsync(CancellationToken token)
 		{
-			var settingsList = _settings.GetSettingsList();	
-			
+			var settingsList = _settings.GetSettingsList();
+
 			try
 			{
 				foreach (var settingNode in settingsList)
@@ -36,10 +36,11 @@ namespace PingerForDEX.Tools
 
 					if (validationResult.IsValid)
 					{
-						var task = new Task(async () =>
+						var task = new Task(async o =>
 						{
-							await Run(settingNode, token);
-						}, token);
+							var (sn, t, ps) = o as (SettingNode, CancellationToken, PingerStarter)? ?? (null, default, null);
+							await ps.Run(sn, t);
+						}, (settingNode, token, this), token);						
 						task.Start();
 					}
 					else
@@ -51,26 +52,26 @@ namespace PingerForDEX.Tools
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.InnerException?.Message);
-			}			
+			}
 		}
 
 
-		private async Task Run(SettingNode settings, CancellationToken token)
+		private async Task Run(SettingNode settingNode, CancellationToken token)
 		{
 			ResponseData responseData;
-			var pinger = _pingerFactory.CreatePinger(settings.ProtocolType);
+			var pinger = _pingerFactory.CreatePinger(settingNode.ProtocolType, settingNode.ExpectedStatus);
 
 			while (!token.IsCancellationRequested)
 			{
-				responseData = await pinger.CheckStatusAsync(settings.HostName);
+				responseData = await pinger.CheckStatusAsync(settingNode.HostName);
 
 				if (responseData.StatusWasChanged)
 				{
 					_logger.LogTheData(responseData.Message);
 				}
-				Thread.Sleep(settings.Period * 1000);
+				Thread.Sleep(settingNode.Period * 1000);
 			}
-			Console.WriteLine(settings.HostName + " - " + " pinger is stopped");			
+			Console.WriteLine(settingNode.HostName + " - " + " pinger is stopped");
 		}
 
 		private void HandleErrors(ValidationResult result)
@@ -80,6 +81,6 @@ namespace PingerForDEX.Tools
 				_logger.LogTheData(item.ErrorMessage);
 				Console.WriteLine("Error! Check setting file.");
 			}
-		}		
+		}
 	}
 }

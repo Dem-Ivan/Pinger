@@ -1,5 +1,4 @@
-﻿
-namespace PingerForDEX.Configuration
+﻿namespace PingerForDEX.Configuration
 {
 	public class SettingNode
 	{
@@ -8,6 +7,8 @@ namespace PingerForDEX.Configuration
 		public int Period { get; set; }	
 
 		public string ProtocolType { get; set; }
-		
+
+		public int ExpectedStatus { get; set; }
+
 	}
 }

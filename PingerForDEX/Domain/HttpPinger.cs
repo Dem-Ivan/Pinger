@@ -17,7 +17,8 @@ namespace PingerForDEX.Domain
 		private HttpStatusCode _previousStatus;
 		private HttpStatusCode _newStatus;
 		private int _statusCode;
-		public string _responseMessage;
+		private string _responseMessage;		
+		public int ExpectedStatus { private get; set; }
 
 		public HttpPinger(HttpClient httpClient, HttpRequestMessage httpRequestMessage)
 		{
@@ -30,17 +31,18 @@ namespace PingerForDEX.Domain
 			var uri = new Uri("http://" + hostName);
 			_httpRequestMessage.Method = HttpMethod.Head;
 			_httpRequestMessage.RequestUri = uri;
-			ResponseData responseData = new ResponseData();
+			var responseData = new ResponseData();
 
 			try
 			{
 				var result = await _httpClient.SendAsync(_httpRequestMessage);
+				
 				_newStatus = result.StatusCode;
 				_statusCode = (int)_newStatus;
 				_responseMessage = CreateResponseMessage(_newStatus.ToString(), hostName);
 				responseData.StatusWasChanged = false;
 
-				if (_newStatus != _previousStatus)
+				if ((_newStatus != _previousStatus) && (_statusCode == ExpectedStatus))
 				{
 					responseData.Message = _responseMessage;
 					responseData.StatusWasChanged = true;
@@ -82,5 +84,7 @@ namespace PingerForDEX.Domain
 				" // " + status
 				);
 		}
+
+		
 	}
 }

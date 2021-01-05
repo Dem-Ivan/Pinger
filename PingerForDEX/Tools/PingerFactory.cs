@@ -2,7 +2,6 @@
 using System;
 using PingerForDEX.Domain;
 
-
 namespace PingerForDEX.Tools
 {
 	public class PingerFactory
@@ -14,15 +13,23 @@ namespace PingerForDEX.Tools
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
-		public IPinger CreatePinger(string protocolType)
-		{
-			return protocolType switch
+		public IPinger CreatePinger(string protocolType, int expectedStatus)
+		{			
+			switch (protocolType)
 			{
-				"ICMP" => _serviceProvider.GetService(typeof(IcmpPinger)) as IcmpPinger,
-				"TCP" => _serviceProvider.GetService(typeof(TcpPinger)) as TcpPinger,
-				"HTTP" => _serviceProvider.GetService(typeof(HttpPinger)) as HttpPinger,
-				_ => throw new ArgumentException("ProtocolType Error"),
-			};
+				case "ICMP":
+					return _serviceProvider.GetService(typeof(IcmpPinger)) as IcmpPinger;
+
+				case "TCP":
+					return _serviceProvider.GetService(typeof(TcpPinger)) as TcpPinger;
+
+				case "HTTP":
+					var pinger = _serviceProvider.GetService(typeof(HttpPinger)) as HttpPinger;
+					pinger.ExpectedStatus = expectedStatus;
+					return pinger;
+				default:
+					throw new ArgumentException("ProtocolType Error");					
+			}			
 		}
 	}
 }
