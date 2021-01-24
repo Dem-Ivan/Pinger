@@ -1,6 +1,7 @@
 ﻿using PingerForDEX.Interfaces;
 using System;
 using PingerForDEX.Domain;
+using System.Net.Http;
 
 namespace PingerForDEX.Tools
 {
@@ -14,22 +15,24 @@ namespace PingerForDEX.Tools
 		}
 
 		public IPinger CreatePinger(string protocolType, int expectedStatus)
-		{			
+		{
+
 			switch (protocolType)
 			{
 				case "ICMP":
+
 					return _serviceProvider.GetService(typeof(IcmpPinger)) as IcmpPinger;
 
 				case "TCP":
 					return _serviceProvider.GetService(typeof(TcpPinger)) as TcpPinger;
 
 				case "HTTP":
-					var pinger = _serviceProvider.GetService(typeof(HttpPinger)) as HttpPinger;
-					pinger.ExpectedStatus = expectedStatus;
-					return pinger;
+					return new HttpPinger(_serviceProvider.GetService(typeof(HttpClient)) as HttpClient,
+										  _serviceProvider.GetService(typeof(HttpRequestMessage)) as HttpRequestMessage,
+										  expectedStatus);
 				default:
-					throw new ArgumentException("ProtocolType Error");					
-			}			
+					throw new ArgumentException("ProtocolType Error");
+			}					   		
 		}
 	}
 }

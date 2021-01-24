@@ -59,11 +59,12 @@ namespace PingerForDEX.Tools
 		private async Task Run(SettingNode settingNode, CancellationToken token)
 		{
 			ResponseData responseData;
+			
 			var pinger = _pingerFactory.CreatePinger(settingNode.ProtocolType, settingNode.ExpectedStatus);
 
 			while (!token.IsCancellationRequested)
 			{
-				responseData = await pinger.CheckStatusAsync(settingNode.HostName);
+				responseData = await pinger.CheckStatusAsync(settingNode.HostName, token);
 
 				if (responseData.StatusWasChanged)
 				{

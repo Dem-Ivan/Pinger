@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingerForDEX.Domain
@@ -17,16 +18,19 @@ namespace PingerForDEX.Domain
 		private HttpStatusCode _previousStatus;
 		private HttpStatusCode _newStatus;
 		private int _statusCode;
-		private string _responseMessage;		
-		public int ExpectedStatus { private get; set; }
+		private string _responseMessage;
+		private readonly int _expectedStatus;
+		
 
-		public HttpPinger(HttpClient httpClient, HttpRequestMessage httpRequestMessage)
+
+		public HttpPinger(HttpClient httpClient, HttpRequestMessage httpRequestMessage, int expectedStatus)
 		{
 			_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 			_httpRequestMessage = httpRequestMessage ?? throw new ArgumentNullException(nameof(httpRequestMessage));
 			_previousStatus = 0;
+			_expectedStatus = expectedStatus;
 		}
-		public async Task<ResponseData> CheckStatusAsync(string hostName)
+		public async Task<ResponseData> CheckStatusAsync(string hostName, CancellationToken token)
 		{
 			var uri = new Uri("http://" + hostName);
 			_httpRequestMessage.Method = HttpMethod.Head;
@@ -35,20 +39,21 @@ namespace PingerForDEX.Domain
 
 			try
 			{
-				var result = await _httpClient.SendAsync(_httpRequestMessage);
+				var result = await _httpClient.SendAsync(_httpRequestMessage,token);
 				
 				_newStatus = result.StatusCode;
 				_statusCode = (int)_newStatus;
 				_responseMessage = CreateResponseMessage(_newStatus.ToString(), hostName);
 				responseData.StatusWasChanged = false;
 
-				if ((_newStatus != _previousStatus) && (_statusCode == ExpectedStatus))
+				if ((_newStatus != _previousStatus) && (_statusCode == _expectedStatus))
 				{
 					responseData.Message = _responseMessage;
 					responseData.StatusWasChanged = true;
 
 					_previousStatus = _newStatus;
 				}
+				else { responseData.Message = "_"; }
 			}			
 			catch (Exception ex)
 			{

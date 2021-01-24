@@ -2,6 +2,7 @@
 using PingerForDEX.Tools;
 using System;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingerForDEX.Domain
@@ -11,13 +12,13 @@ namespace PingerForDEX.Domain
 
 		private string _previousStatus;
 		private string _newStatus;
-		private string _responseMessage;
-		
+		private string _responseMessage;		
 
-		public async Task<ResponseData> CheckStatusAsync(string hostName)
+		public async Task<ResponseData> CheckStatusAsync(string hostName, CancellationToken token)
 		{
 			using var tcpClient = new TcpClient();
 			ResponseData respounseData = new ResponseData();
+
 			try
 			{
 				var task = Task.Run(() => tcpClient.ConnectAsync(hostName, 80).Wait(1000));

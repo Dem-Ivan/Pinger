@@ -2,6 +2,7 @@
 using PingerForDEX.Tools;
 using System;
 using System.Net.NetworkInformation;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingerForDEX.Domain
@@ -18,7 +19,7 @@ namespace PingerForDEX.Domain
 			_ping = ping ?? throw new ArgumentNullException(nameof(ping));
 			_previousStatus = IPStatus.Unknown;
 		}
-		public async Task<ResponseData> CheckStatusAsync(string hostName)
+		public async Task<ResponseData> CheckStatusAsync(string hostName, CancellationToken token)
 		{
 			var uri = hostName;
 			var respounseData = new ResponseData();

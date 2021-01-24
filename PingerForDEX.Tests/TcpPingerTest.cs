@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using PingerForDEX.Domain;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace PingerForDEX.Tests
 {
@@ -11,9 +12,11 @@ namespace PingerForDEX.Tests
 		{
 			//Arrange			
 			var tcpPinger = new TcpPinger();
+			var cts = new CancellationTokenSource();
+			var token = cts.Token;
 
 			//Act
-			var result = await tcpPinger.CheckStatusAsync("www.ya.ru");
+			var result = await tcpPinger.CheckStatusAsync("www.ya.ru",token);
 
 			//Assert
 			Assert.NotNull(result.Message);

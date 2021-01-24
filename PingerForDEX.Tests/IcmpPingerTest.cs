@@ -3,6 +3,7 @@ using PingerForDEX.Domain;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
 using System;
+using System.Threading;
 
 namespace PingerForDEX.Tests
 {	
@@ -22,9 +23,11 @@ namespace PingerForDEX.Tests
 			//Arrange					
 			var ping = new Ping();
 			var icmpPinger = new IcmpPinger(ping);
+			var cts = new CancellationTokenSource();
+			var token = cts.Token;
 
 			//Act
-			var result = await icmpPinger.CheckStatusAsync("www.ya.ru");
+			var result = await icmpPinger.CheckStatusAsync("www.ya.ru",token);
 
 			//Assert
 			Assert.NotNull(result.Message);
